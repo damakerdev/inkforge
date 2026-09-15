@@ -2,8 +2,11 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database import get_db,engine
+from app.models.note import NoteModel
+from app.api.v1.endpoints import notes
 
+NoteModel.metadata.create_all(bind=engine)
 app=FastAPI(
     title="InkForge API Core",
     version="0.1.0",
@@ -21,7 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.include_router(notes.router,prefix="/api/v1")
 @app.get("/")
 def read_root():
     return {"status":"success","message":"Welcome to InkForge v0.1.0 :)"}

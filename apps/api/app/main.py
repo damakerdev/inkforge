@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.core.database import get_db
 
 app=FastAPI(
     title="InkForge API Core",
@@ -24,5 +27,9 @@ def read_root():
     return {"status":"success","message":"Welcome to InkForge v0.1.0 :)"}
 
 @app.get("/health")
-def health_check():
-    return {"status":"healthy"}
+def health_check(db: Session=Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status":"healthy","database":"connected"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Db connection error:{str(e)}")

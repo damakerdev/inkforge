@@ -9,3 +9,25 @@
   --font-mono: "IBM Plex Mono", monospace;
   --font-merri: "Merriweather", serif;
 }
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track{
+  background: transparent;
+}
+::-webkit-scrollbar-thumb{
+  background: #262626;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background-color: #404040;
+  cursor:pointer;
+}
+
+*{
+  scrollbar-width: thin;
+  scrollbar-color: #262626 transparent;
+}

@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { PenTool } from 'lucide-react';
+import { useNoteStore } from './stores/useNoteStore';
+import { MdEditor } from './components/MdEditor';
 
 export default function App(){
   const [backendStatus, setBackendStatus] = useState<string>("Connecting to backend server...");
+  const {
+    notes,activeNoteId,fetchNotes,updateNoteContent
+  }=useNoteStore();
+
   useEffect(()=>{
     fetch('http://127.0.0.1:8000/health')
       .then((res)=>res.json())
@@ -13,9 +19,11 @@ export default function App(){
         setBackendStatus("offline");
         console.error("connection error: ",err);
       });
-  },[]);
+    fetchNotes()
+  },[fetchNotes]);
+  const activeNote=notes.find((currnote)=>currnote.id===activeNoteId);
   return (
-    <div className='min-h-screen bg-neutral-900 text-neutral-300 flex flex-col justify-between font-inter selection:bg-sky-900 selection:text-white'>
+    <div className='h-screen w-screen bg-neutral-900 text-neutral-300 flex flex-col justify-between font-inter selection:bg-sky-900 selection:text-white overflow-hidden'>
       <header className='w-full flex justify-between items-center px-6 py-4 border-b border-neutral-800 text-neutral-400'>
         <div className='flex items-center space-x-2'>
           <div className='flex items-center space-x-1.5 px-2 py-1 rounded hover:bg-neutral-800/50 cursor-pointer transition-colors text-neutral-200'>
@@ -28,8 +36,18 @@ export default function App(){
           <span className={`flex items-center space-x-1.5 px-2 py-0.5 text-xs rounded-md font-mono border ${backendStatus==='healthy'?'bg-green-900/50 border-green-800 text-green-400':'bg-red-900/50 border-red-800 text-red-400'}`}>{backendStatus.toUpperCase()}</span>
         </div>
       </header>
-      <main className='flex-1 flex items-center justify-center'>
-        <p className='text-neutral-500 font-medium tracking-wide font-inter'>THIS IS OUR FIRST DRAFT :)</p>
+
+      <main className='flex-1 overflow-hidden flex flex-col items-center w-full'>
+        {/* <p className='text-neutral-500 font-medium tracking-wide font-inter'>THIS IS OUR FIRST DRAFT :)</p> */}
+        {activeNote ? (
+          <div className='flex-1 h-full w-full'>
+            <MdEditor content={activeNote.content} onChange={(markdown)=>updateNoteContent(markdown)} />
+          </div>
+        ):(
+          <div className='flex-1 flex items-center justify-center'>
+            <p className='text-neutral-500 font-medium font-inter'>loading note...</p>
+          </div>
+        )}
       </main>
 
       <footer className='w-full border-t border-neutral-800 px-6 py-2 text-xs justify-between items-center font-mono text-neutral-600'>

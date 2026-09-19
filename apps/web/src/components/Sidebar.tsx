@@ -1,9 +1,18 @@
 import React, { useState } from 'react'
 import { useNoteStore } from '../stores/useNoteStore';
-import {Note } from '../services/noteService';
+
+
+// Local type definition  to resolve the build error
+export interface Note {
+    id: string;
+    title: string;
+    content: string;
+    created_at?: string;
+    updated_at?:string;
+}
 
 export const Sidebar: React.FC = () => {
-    const {notes, activeNote, setActiveNote, addNote, deleteNote } = useNoteStore();
+    const {notes, activeNote, setActiveNote, createNote:addNote, deleteNote } = useNoteStore();
     const [searchTerm, setSearchTerm] = useState('');
 
     //Safeguard against undefined notes array during initial API fetch

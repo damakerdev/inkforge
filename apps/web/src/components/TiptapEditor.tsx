@@ -2,15 +2,18 @@
 
 
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Markdown } from 'tiptap-markdown';
 import { useNoteStore } from '../stores/useNoteStore';
+import { WikilinkSuggest } from './WikilinkSuggest';
 
 
 export const TiptapEditor: React.FC = () => {
   const { activeNote, saveActiveNote } = useNoteStore();
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [suggestQuery, setSuggestQuery] = useState('');
 
 
   const editor = useEditor({
@@ -24,7 +27,17 @@ export const TiptapEditor: React.FC = () => {
       if (currentActive) {
         const mdOutput = (editor.storage as any).markdown.getMarkdown();
         saveActiveNote(currentActive.title, mdOutput);
+
+
+        // Detect [[ typing trigger for wikilink autocomplete
+        const match = mdOutput.match (/\[\[([^\]]*)$/);
+        if (match) {
+          setShowSuggest(true);
+          setSuggestQuery(match[1]);
+      } else {
+        setShowSuggest(false);
       }
+    }
     },
     editorProps: {
       attributes: {
@@ -44,6 +57,17 @@ export const TiptapEditor: React.FC = () => {
   }, [activeNote?.id,editor]);
 
 
+  // Handle selecting a note title from the WikilinkSuggest dropdown
+  const handleSelectWikilink =(selectedTitle: string) => {
+    if (!editor || !activeNote ) return;
+    const currentMd = (editor.storage as any).markdown.getMarkdown();
+    const updatedMd = currentMd.replace(/\[\[([^\]]*)$/, `[[{$selectedTitle}]] `);
+
+    editor.commands.setContent(updatedMd);
+    saveActiveNote(activeNote.title,updatedMd);
+    setShowSuggest(false);
+  };
+
   if (!activeNote) {
     return (
       <div className="flex-1 flex items-center justify-center bg-neutral-950 text-neutral-500 font-mono text-sm">
@@ -53,9 +77,12 @@ export const TiptapEditor: React.FC = () => {
   }
 
   return (
-
-
-    <div className="flex-1 flex flex-col h-full bg-neutral-950 p-6 overflow-hidden">
+    <div className="relative flex-1 flex flex-col h-full bg-neutral-950 p-6 overflow-hidden">
+      {/* Floating Wikilink Autocomplete Dropdown */}
+      {showSuggest && (
+        <WikilinkSuggest query={suggestQuery} onSelect={handleSelectWikilink} />
+      )}
+      
       {/* Note Title Input */}
       <input 
       type="text"

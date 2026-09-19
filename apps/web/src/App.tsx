@@ -3,6 +3,7 @@ import { PenTool } from 'lucide-react';
 import { useNoteStore } from './stores/useNoteStore';
 import {Sidebar } from './components/Sidebar';
 import {TiptapEditor} from './components/TiptapEditor';
+import { Backlinks } from './components/Backlinks';
 
 export default function App(){
   const [backendStatus, setBackendStatus] = useState<string>("Connecting to backend server...");
@@ -38,10 +39,12 @@ export default function App(){
         </div>
       </header>
 
+{/* Main Workspace: Sidebar + Editor + Backlinks */}
       <main className='flex-1 overflow-hidden flex w-full'>
         <Sidebar />
-        <div className='flex-1 h-full overflow-hidden'>
+        <div className='flex-1 h-full overflow-hidden flex flex-col'>
           <TiptapEditor />
+          <Backlinks/>
         </div>
       </main>
 

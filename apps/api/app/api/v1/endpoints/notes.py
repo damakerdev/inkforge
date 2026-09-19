@@ -6,8 +6,11 @@ from app.core.database import get_db
 from app.models.note import NoteModel
 from app.schemas.note import NoteCreate, NoteUpdate, NoteOut
 
-router=APIRouter(prefix="/notes",tags=["Notes"])
-@router.post("/",response_model=NoteOut,status_code=status.HTTP_201_CREATED)
+router=APIRouter(tags=["Notes"])
+
+@router.post("",response_model=NoteOut,status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=NoteOut, status_code=status.HTTP_201_CREATED)
+
 def create_note(note_data:NoteCreate,db:Session=Depends(get_db)):
     db_note=NoteModel(
         title=note_data.title,
@@ -19,7 +22,9 @@ def create_note(note_data:NoteCreate,db:Session=Depends(get_db)):
     db.refresh(db_note)
     return db_note
 
+@router.get("",response_model=List[NoteOut])
 @router.get("/",response_model=List[NoteOut])
+
 def read_all_notes(db:Session=Depends(get_db)):
     return db.query(NoteModel).filter(NoteModel.is_archived==False).order_by(NoteModel.updated_at.desc()).all()
 

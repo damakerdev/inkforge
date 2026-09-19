@@ -8,7 +8,8 @@ from app.api.v1.endpoints import notes
 app=FastAPI(
     title="InkForge API Core",
     version="0.1.0",
-    description="Backend service for InkForge"
+    description="Backend service for InkForge",
+    redirect_slashes=True
 )
 origins=[
     "http://localhost:5173",

@@ -1,28 +1,30 @@
 // discontinued using tiptap, using react-markdown for now. may use it later in v0.2
 
-import React, { useEffect, useState } from 'react';
+
+
+import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Markdown } from 'tiptap-markdown';
+import { useNoteStore } from '../stores/useNoteStore';
 
-interface TiptapEditorProps {
-  content: string;
-  onChange: (markdown: string) => void;
-}
 
-export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, onChange }) => {
-  const [rawMd, setRawMd] = useState(content);
+export const TiptapEditor: React.FC = () => {
+  const { activeNote, saveActiveNote } = useNoteStore();
+
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Markdown,
     ],
-    content: content,
+    content: activeNote?.content || '',
     onUpdate: ({ editor }) => {
-      const mdOutput = (editor.storage as any).markdown.getMarkdown();
-      setRawMd(mdOutput);
-      onChange(mdOutput);
+      const currentActive = useNoteStore.getState().activeNote;
+      if (currentActive) {
+        const mdOutput = (editor.storage as any).markdown.getMarkdown();
+        saveActiveNote(currentActive.title, mdOutput);
+      }
     },
     editorProps: {
       attributes: {
@@ -31,20 +33,41 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, onChange })
     },
   });
 
+  // Sync editor content when switching active notes in the sidebar
   useEffect(() => {
-    if (editor) {
-      const currMd = (editor.storage as any).markdown.getMarkdown();
-      if (content !== currMd) {
-        editor.commands.setContent(content);
-        setRawMd(content);
+    if (editor && activeNote) {
+      const currentMd = (editor.storage as any).markdown.getMarkdown();
+      if (activeNote.content !== currentMd) {
+        editor.commands.setContent(activeNote.content || '');
       }
     }
-  }, [content, editor]);
+  }, [activeNote?.id,editor]);
 
-  if (!editor) return null;
+
+  if (!activeNote) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-neutral-950 text-neutral-500 font-mono text-sm">
+        Select a note or create a new one to start writing.
+      </div>
+    );
+  }
 
   return (
+
+
+    <div className="flex-1 flex flex-col h-full bg-neutral-950 p-6 overflow-hidden">
+      {/* Note Title Input */}
+      <input 
+      type="text"
+      value={activeNote.title}
+      onChange={(e) => saveActiveNote(e.target.value, activeNote.content)}
+      placeholder="Untitled Note"
+      className="text-3xl font-bold bg-transparent border-none outline-none mb-4 text-neutral-100 placeholder-neutral-600 w-full"
+      />
+
+    {/* Split Pane: WYSIWYG Editor vs Raw Mardown View */}
     <div className="grid grid-cols-2 gap-4 h-full overflow-hidden">
+      {/* Rich Text Editor */}
       <div className="border border-neutral-800 rounded-lg bg-neutral-900/30 flex flex-col overflow-hidden">
         <div className="bg-neutral-900/80 px-4 py-2 border-b border-neutral-800 text-[11px] font-mono text-neutral-400 uppercase tracking-wider shrink-0 flex justify-between">
           <span>rich text editor</span>
@@ -55,15 +78,17 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, onChange })
         </div>
       </div>
 
+      {/* Live Raw Markdown Sync */}
       <div className="border border-neutral-800 rounded-lg bg-neutral-950 flex flex-col overflow-hidden">
         <div className="bg-neutral-900/80 px-4 py-2 border-b border-neutral-800 text-[11px] font-mono text-neutral-400 uppercase tracking-wider shrink-0 flex justify-between">
           <span>raw markdown</span>
           <span className="text-emerald-500 lowercase">live sync</span>
         </div>
         <pre className="p-4 text-xs font-mono text-neutral-400 whitespace-pre-wrap break-words overflow-y-auto flex-1 select-text">
-          {rawMd}
+          {activeNote.content}
         </pre>
       </div>
+    </div>
     </div>
   );
 };

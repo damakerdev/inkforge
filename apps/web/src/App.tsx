@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { PenTool } from 'lucide-react';
 import { useNoteStore } from './stores/useNoteStore';
-import { MdEditor } from './components/MdEditor';
+import {Sidebar } from './components/Sidebar';
+import {TiptapEditor} from './components/TiptapEditor';
 
 export default function App(){
   const [backendStatus, setBackendStatus] = useState<string>("Connecting to backend server...");
   const {
-    notes,activeNoteId,fetchNotes,updateNoteContent
+    fetchNotes
   }=useNoteStore();
 
   useEffect(()=>{
-    fetch('http://127.0.0.1:8000/health')
+    fetch('http://127.0.0.1:8000/')
       .then((res)=>res.json())
       .then((data)=>{
         setBackendStatus(`${data.status}`);
@@ -21,7 +22,7 @@ export default function App(){
       });
     fetchNotes()
   },[fetchNotes]);
-  const activeNote=notes.find((currnote)=>currnote.id===activeNoteId);
+
   return (
     <div className='h-screen w-screen bg-neutral-900 text-neutral-300 flex flex-col justify-between font-inter selection:bg-sky-900 selection:text-white overflow-hidden'>
       <header className='w-full flex justify-between items-center px-6 py-4 border-b border-neutral-800 text-neutral-400'>
@@ -37,17 +38,11 @@ export default function App(){
         </div>
       </header>
 
-      <main className='flex-1 overflow-hidden flex flex-col items-center w-full'>
-        {/* <p className='text-neutral-500 font-medium tracking-wide font-inter'>THIS IS OUR FIRST DRAFT :)</p> */}
-        {activeNote ? (
-          <div className='flex-1 h-full w-full'>
-            <MdEditor content={activeNote.content} onChange={(markdown)=>updateNoteContent(markdown)} />
-          </div>
-        ):(
-          <div className='flex-1 flex items-center justify-center'>
-            <p className='text-neutral-500 font-medium font-inter'>loading note...</p>
-          </div>
-        )}
+      <main className='flex-1 overflow-hidden flex w-full'>
+        <Sidebar />
+        <div className='flex-1 h-full overflow-hidden'>
+          <TiptapEditor />
+        </div>
       </main>
 
       <footer className='w-full border-t border-neutral-800 px-6 py-2 text-xs justify-between items-center font-mono text-neutral-600'>

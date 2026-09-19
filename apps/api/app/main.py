@@ -3,14 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.core.database import get_db,engine
-from app.models.note import NoteModel
 from app.api.v1.endpoints import notes
 
-NoteModel.metadata.create_all(bind=engine)
 app=FastAPI(
     title="InkForge API Core",
     version="0.1.0",
-    description="backend service for InkForge"
+    description="Backend service for InkForge"
 )
 origins=[
     "http://localhost:5173",
@@ -24,10 +22,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(notes.router,prefix="/api/v1")
+
+app.include_router(notes.router,prefix="/api/v1/notes", tags=["notes"])
 @app.get("/")
 def read_root():
-    return {"status":"success","message":"Welcome to InkForge v0.1.0 :)"}
+    return {"status":"healthy","message":"Welcome to InkForge v0.1.0 :)"}
 
 @app.get("/health")
 def health_check(db: Session=Depends(get_db)):

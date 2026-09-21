@@ -23,11 +23,13 @@ basically, Obsidian but *our own*.
 - [x] Created a basic fastapi backend service with endpoints for notes (basic CRUD endpoints)
 - [x] Made a zustand state store that syncs the state with db endpoints.
 - [x] A 2 column basic frontend markdown previewer where u input raw text on one column and get the markdown preview in the other.
+- [x] create new note, see all notes, delete notes
+- [x] Graph visualization with link files feature
 
 TODO: A LOT...
-- [ ] Add features like create new note, see all notes, delete notes. Backend stuff is done, just need to design a simple sidebar and we're done with this feature.
 - [ ] Real time collaboration
-- [ ] Graph visualization.. and many more things to do
+- [ ] UI/UX polish to make inkforge feel more goood
+- [ ] Fix the wikilinks feature, file linking doesn't work properly
 
 ## Running InkForge locally:
 
@@ -62,4 +64,9 @@ npm run dev
 
 ## peek peek 📸
 
-![inkforge-app-in-action](img/inkforge.png)
+![inkforge-app-in-action-v0.2](img/inkforge1.png)
+
+![knowledge-graph-feature](img/knowledge-graph-img.png)
+
+
+![inkforge-app-in-action-v0.1](img/inkforge.png)

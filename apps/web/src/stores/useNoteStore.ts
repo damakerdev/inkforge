@@ -8,24 +8,32 @@ export interface Note{
 }
 interface NoteState {
     notes: Note[];
-    activeNoteId: string|null;
+    activeNoteId: string | null;
     isLoading: boolean;
+    activeNote: Note | null;
     fetchNotes:()=>Promise<void>;
     setActiveNoteId: (id:string)=>void;
-    createNote: ()=>Promise<void>;
+    setActiveNote: (note: Note | null) => void;
+    createNote: (noteData? : {title?: string; content?: string}) => Promise<void>;
+    saveActiveNote: (title: string, content: string) => Promise<void>;
     updateNoteContent: (content: string) =>Promise<void>;
     updateNoteTitle:(title:string)=>Promise<void>;
     deleteNote:(id:string)=> Promise<void>;
+    importNotes: (importedNotes: any[]) => Promise<void>;
 }
 
-const API="http://localhost:8000/api/v1/notes";
-export const useNoteStore=create<NoteState>((set,get)=>({
+const API="http://127.0.0.1:8000/api/v1/notes";
+
+export const useNoteStore=create<NoteState>((set,get)=> ({
     notes: [],
-    activeNoteId: '1',
+    activeNoteId: null,
+    activeNote: null,
     isLoading: false,
+
     fetchNotes:async()=>{
-        set({isLoading:true})
-        try{
+        set({isLoading:true});
+
+        try {
             const resp=await fetch(`${API}/`);
             if(resp.ok){
                 const data=await resp.json();
@@ -33,94 +41,185 @@ export const useNoteStore=create<NoteState>((set,get)=>({
                     id:n.id,
                     title:n.title,
                     content:n.content,
-                    updatedAt:new Date(n.updated_at).toLocaleTimeString(),
+                    updatedAt: n.updated_at ? new Date(n.updated_at).toLocaleTimeString() : new Date().toLocaleTimeString(),
                 }));
+
+                const currentActiveId = get().activeNoteId;
+                const selectedNote = formattedNotes.find((n) => n.id === currentActiveId) || (formattedNotes.length > 0 ? formattedNotes[0]: null );
                 set({
                     notes:formattedNotes,
-                    activeNoteId:formattedNotes.length>0?formattedNotes[0].id:null,
+                    activeNoteId:selectedNote ? selectedNote.id : null,
+                    activeNote: selectedNote,
                     isLoading:false,
                 });
             }
-        }
-        catch(erorr){
-            console.error("failed to fetch notes from backend:",erorr)
-            set({isLoading:false})
+         } catch(error){
+            console.error("Failed to fetch notes from backend:",error);
+            set({isLoading:false});
         }
     },
-    setActiveNoteId: (id)=>set({activeNoteId: id}),
-    createNote: async()=>{
+    
+    setActiveNoteId: (id: string) => {
+        const foundNote = get().notes.find((n) => n.id === id) || null;
+        set ({ activeNoteId: id, activeNote: foundNote });
+    },
+
+    setActiveNote: (note: Note | null) => {
+        set({ activeNoteId: note ? note.id: null, activeNote: note });
+    },
+    
+    createNote: async(noteData)=>{
         try{
             const resp=await fetch(`${API}/`,{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify({
-                    tile: "Untitled",
-                    content:"# Untitled Note\n\nNever gonna give you up...\nNever gonna let you down...",
-                }),
+                    title: noteData?.title || "Untitled Note",
+                    content: noteData?.content || "",
+                is_archived: false,
+                            }),
             });
+
+            
             if(resp.ok){
                 const currnote=await resp.json()
                 const newNote: Note = {
                     id: currnote.id,
                     title: currnote.title,
                     content: currnote.content,
-                    updatedAt: new Date(currnote.updated_at).toLocaleTimeString(),
+                    updatedAt: new Date().toLocaleTimeString(),
                 };
+
                 set((state)=>({
                     notes:[newNote,...state.notes],
                     activeNoteId:newNote.id,
-                }))
+                    activeNote: newNote,
+                }));
+            
             }
-        } catch(erorr){
-            console.error("failed to create note: ", erorr);
+        } catch(error){
+            console.error("failed to create note: ", error);
         }
     },
-    updateNoteContent: async(content)=>{
+
+    saveActiveNote: async (title: string, content: string) => {
+        const { activeNoteId, notes } = get();
+        if (!activeNoteId) return;
+
+        const updatedNotes = notes.map((note) =>
+            note.id === activeNoteId
+            ? { ...note,title,content,updatedAt: new Date().toLocaleTimeString() }
+            : note
+);
+
+const updatedActiveNote = updatedNotes.find((n) => n.id === activeNoteId) || null;
+
+set ({ notes: updatedNotes, activeNote: updatedActiveNote });
+
+try {
+    await fetch(`${API}/${activeNoteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({title, content }),
+    });
+
+} catch (error) {
+    console.error("Failed to sync active note to server:", error);
+}
+    },
+
+
+    updateNoteContent: async(content: string)=> {
         const{activeNoteId,notes}=get();
         if(!activeNoteId)return
-        set({
-            notes: notes.map((note)=>note.id===activeNoteId? {...note,content,updatedAt:new Date().toLocaleTimeString()}:note),
-        })
+
+        const updatedNotes = notes.map((note) =>
+            note.id === activeNoteId
+             ? { ...note, content, updatedAt: new Date().toLocaleTimeString() }
+             : note
+);
+
+            set({
+                notes: updatedNotes,
+                activeNote: updatedNotes.find((n) => n.id === activeNoteId) || null,
+            });
+
+
         try{
             await fetch(`${API}/${activeNoteId}`,{
                 method:"PUT",
                 headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({content}),
-            })
-        } catch(errorr){
-            console.error("failed to update content on server",errorr);
+                body:JSON.stringify({ content }),
+            });
+
+        } catch(error){
+            console.error("Failed to update content on server",error);
         }
     },
-    updateNoteTitle:async(title)=>{
+
+    updateNoteTitle:async(title: string )=>{
         const {activeNoteId,  notes}=get();
         if(!activeNoteId)return;
+
+
+        const updatedNotes = notes.map((note) => 
+            note.id === activeNoteId
+            ? { ...note, title, updatedAt: new Date().toLocaleTimeString() }
+            : note
+);
+
         set({
-            notes:notes.map((note)=>note.id=== activeNoteId?{...note,title,updatedAt:new Date().toLocaleTimeString()} :note),
-        })
+            notes: updatedNotes,
+            activeNote: updatedNotes.find((n) => n.id === activeNoteId) || null,
+                });
+
         try {
             await fetch(`${API}/${activeNoteId}`,{
                 method:"PUT",
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify({title}),
-            })
-        } catch(errorr){
-            console.error("failed to update title on srver",errorr);
+            });
+
+        } catch(error){
+            console.error("Failed to update title on server",error);
         }
     },
-    deleteNote:async(id)=>{
+
+    deleteNote:async(id: string )=>{
         try {
-            const res=await fetch(`${API}/${id}`,{method:"DELETE"})
+            const res=await fetch(`${API}/${id}`,{method:"DELETE"});
             if(res.ok){
                 set((state)=>{
-                    const remaininNote=state.notes.filter((n)=>n.id!==id);
+                    const remainingNotes=state.notes.filter((n)=>n.id!==id);
+                    const nextActive = remainingNotes.length >0 ? remainingNotes[0] : null;
                     return {
-                        notes:remaininNote,
-                        activeNoteId:remaininNote.length>0? remaininNote[0].id:null,
-                    }
-                })
+                        notes:remainingNotes,
+                        activeNoteId: nextActive ? nextActive.id : null,
+                        activeNote: nextActive,
+                                   };               
+                });
             }
-        } catch(errorr){
-            console.error("failed to delete note on server",errorr);
+        } catch(error){
+            console.error("Failed to delete note on server",error);
+        }
+    },
+
+    importNotes: async (importedNotes: any[]) => {
+        try {
+            for(const note of importedNotes) {
+                await fetch(`${API}/`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify ({
+                        title: note.title || "Imported Note",
+                        content: note.content || "",
+                        is_archived: false,
+                    }),
+                });
+            }
+        await get().fetchNotes();
+        } catch (error) {
+            console.error("Failed to import notes:", error);
         }
     },
 }));

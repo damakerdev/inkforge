@@ -14,7 +14,8 @@ export default function App(){
   const { fetchNotes } =useNoteStore();
 
   useEffect(()=>{
-    fetch('http://127.0.0.1:8000/')
+    const API_BASE=import.meta.env.VITE_API_URL||"127.0.0.1:8000";
+    fetch(`${API_BASE}`)
       .then((res)=>res.json())
       .then((data)=>{
         setBackendStatus(`${data.status}`);

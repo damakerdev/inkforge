@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -13,7 +14,8 @@ app=FastAPI(
 )
 origins=[
     "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173",
+    os.getenv("FRONTEND_URL","*")
 ]
 
 app.add_middleware(

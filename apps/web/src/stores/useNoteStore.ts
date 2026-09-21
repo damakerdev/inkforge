@@ -22,7 +22,8 @@ interface NoteState {
     importNotes: (importedNotes: any[]) => Promise<void>;
 }
 
-const API="http://127.0.0.1:8000/api/v1/notes";
+const API_BASE=import.meta.env.VITE_API_URL||"http://127.0.0.1:8000";
+const API=`${API_BASE}/api/v1/notes`;
 
 export const useNoteStore=create<NoteState>((set,get)=> ({
     notes: [],

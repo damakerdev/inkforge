@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
-import { useNoteStore } from '../stores/useNoteStore';
+import { useNoteStore, type Note} from '../stores/useNoteStore';
 
 
 // Local type definition  to resolve the build error
-export interface Note {
-    id: string;
-    title: string;
-    content: string;
-    created_at?: string;
-    updated_at?:string;
-}
+// export interface Note {
+//     id: string;
+//     title: string;
+//     content: string;
+//     created_at?: string;
+//     updated_at?:string;
+// }
 
 export const Sidebar: React.FC = () => {
     const {notes, activeNote, setActiveNote, createNote:addNote, deleteNote } = useNoteStore();
@@ -42,7 +42,7 @@ export const Sidebar: React.FC = () => {
             <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
                 <h1 className="font-bold text-lg text-neutral-100 tracking-tight">InkForge</h1>
                 <button 
-                    onClick={ () => addNote('Untitled Note', '')}
+                    onClick={ () => addNote({ title: 'Untitled Note', content: ''})}
                     className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-md text-xs font-semibold transition cursor-pointer">
                         +New
                     </button>
@@ -52,7 +52,7 @@ export const Sidebar: React.FC = () => {
             <div className="p-3 border-b border-neutral-800">
                 <input
                     type="text"
-                    placeholder="Search notes..."
+                    placeholder="search notes..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-700"
@@ -67,13 +67,13 @@ export const Sidebar: React.FC = () => {
                             </p>
                         ) : (
                          filteredNotes.map((note) => {
-                         const isActive = activeNote?.id === note.id;
+                         const isactive = activeNote?.id === note.id;
                          return (
                          <div 
                          key={note.id}
                          onClick = {() => handleSelectNote(note)}
                          className={`p-3 border-b border-neutral-800/50 cursor-pointer flex justify-between items-center group transition  ${
-                            activeNote?.id ===  note.id
+                            isactive
                             ? 'bg-neutral-800 text-neutral-100 font-medium'
                             : 'hover:bg-neutral-800/40 text-neutral-400 hover:text-neutral-200'
                             }`}

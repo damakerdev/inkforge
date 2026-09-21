@@ -46,7 +46,7 @@ export const useNoteStore=create<NoteState>((set,get)=> ({
                 }));
 
                 const currentActiveId = get().activeNoteId;
-                const selectedNote = formattedNotes.find((n) => n.id === currentActiveId) || (formattedNotes.length > 0 ? formattedNotes[0]: null );
+                const selectedNote = formattedNotes.find((n:Note) => n.id === currentActiveId) || (formattedNotes.length > 0 ? formattedNotes[0]: null );
                 set({
                     notes:formattedNotes,
                     activeNoteId:selectedNote ? selectedNote.id : null,

@@ -58,7 +58,7 @@ export const TiptapEditor: React.FC = () => {
 
 
   // Handle selecting a note title from the WikilinkSuggest dropdown
-  const handleSelectWikilink =(selectedTitle: string) => {
+  const handleSelectWikilink =() => {
     if (!editor || !activeNote ) return;
     const currentMd = (editor.storage as any).markdown.getMarkdown();
     const updatedMd = currentMd.replace(/\[\[([^\]]*)$/, `[[{$selectedTitle}]] `);

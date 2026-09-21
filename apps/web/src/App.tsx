@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PenTool, Network, Download } from 'lucide-react';
 import { useNoteStore } from './stores/useNoteStore';
 import {Sidebar } from './components/Sidebar';

@@ -5,7 +5,9 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.core.database import get_db,engine
 from app.api.v1.endpoints import notes
+from app.models.note import NoteModel
 
+NoteModel.metadata.create_all(bind=engine)
 app=FastAPI(
     title="InkForge API Core",
     version="0.1.0",

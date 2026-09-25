@@ -69,8 +69,8 @@ export default function App(){
         <div className='flex-1 h-full overflow-hidden flex flex-col'>
           {/* <TiptapEditor />  */}
           {backendStatus==='connecting'?(
-            <div className='flex-1 flex flex-col gap-5 items-center justify-center text-neutral-500'>
-              <Loader2 className='w-5 h-5 animate-spin text-sky-400'/>
+            <div className='flex-1 flex gap-2 flex-col items-center justify-center text-neutral-500'>
+              <Loader2 className='w-10 h-10 animate-spin text-sky-400'/>
               <span className='text-[20px] text-neutral-400 font-medium'>Connecting to API server...</span>  
               <span className='text-[12px] text-neutral-600 max-w-sm text-center'>Render server is starting up, it may take about 30 seconds</span>
             </div>

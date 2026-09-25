@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { PenTool, Network, Download } from 'lucide-react';
 import { useNoteStore } from './stores/useNoteStore';
 import {Sidebar } from './components/Sidebar';
-import {TiptapEditor} from './components/TiptapEditor';
+// import {TiptapEditor} from './components/TiptapEditor';
+import { MdEditor } from './components/MdEditor';
 import { Backlinks } from './components/Backlinks';
 import { GraphView } from './components/GraphView';
 import {ExportModal} from './components/ExportModal';
@@ -11,7 +12,7 @@ export default function App(){
   const [backendStatus, setBackendStatus] = useState<string>("Connecting to backend server...");
   const [isGraphOpen, setIsGraphOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const { fetchNotes } =useNoteStore();
+  const { fetchNotes, activeNote, updateNoteContent } =useNoteStore();
 
   useEffect(()=>{
     const API_BASE=import.meta.env.VITE_API_URL||"http://127.0.0.1:8000";
@@ -65,7 +66,14 @@ export default function App(){
       <main className='flex-1 overflow-hidden flex w-full'>
         <Sidebar />
         <div className='flex-1 h-full overflow-hidden flex flex-col'>
-          <TiptapEditor />
+          {/* <TiptapEditor />  */}
+          {activeNote ? (
+            <MdEditor 
+            content={activeNote.content}
+             onChange={(newcontnt)=>updateNoteContent(newcontnt)}
+          />):(
+            <div>no note selected. select or create a note from the sidebar.</div>
+          )}
           <Backlinks/>
         </div>
       </main>

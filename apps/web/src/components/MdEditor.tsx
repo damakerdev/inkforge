@@ -24,7 +24,7 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
       <div className='bg-neutral-900/30 flex flex-col overflow-hidden h-full border-l border-neutral-800'>
         <span className='bg-neutral-800/50 text-[12px] font-semibold font-inter justify-center rounded border border-neutral-700 mx-3 uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>markdown preview</span>
 
-        <div className='flex-1 p-4 oveflow-y-auto prose prose-invert max-w-none font-inter overflow-hidden pr-1'>
+        <div className='flex-1 p-4 overflow-y-auto prose prose-invert max-w-none font-inter overflow-hidden pr-1'>
           {/* old code very simple */}
           {/* <ReactMarkdown>{content || "*preview txtt...*"}</ReactMarkdown> */} 
 
@@ -68,6 +68,9 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
               <img
                 {...props} style={{display:'inline-block',marginRight:'4px',marginTop:'0px',marginBottom:'0px'}} alt={props.alt||'img'}
               />
+            ),
+            a: ({ node, ...props})=>(
+              <a {...props} target="_blank" rel="noopener noreferrer" className='text-sky-400 hover:underline'/>
             )
           }}>
             {content||"*nothing to preview yet ;-;*"}

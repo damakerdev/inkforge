@@ -2,6 +2,8 @@ import React from 'react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import { remarkLinks } from './remarkLinks';
+import { useNoteStore } from '../stores/useNoteStore';
 
 interface EditorProps {
   content: string;
@@ -9,6 +11,20 @@ interface EditorProps {
 }
 
 export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
+
+  const {notes, setActiveNote}=useNoteStore();
+  const handleLinkClick=(e: React.MouseEvent,title:string)=>{
+    e.preventDefault();
+    const targetnote=notes.find(
+      (n)=>n.title.toLowerCase()===title.toLowerCase()
+    )
+    if(targetnote){
+      setActiveNote(targetnote)
+    } else {
+      alert(`note "${title} doesnot exist! :(`);
+    }
+  }
+
   return (
     <div className='grid grid-cols-2 h-full w-full overflow-hidden'>
       <div className='bg-neutral-950/30 flex flex-col overflow-hidden h-full pr-1 pt-1'>
@@ -63,15 +79,23 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
             prose-th:border-neutral-800
             prose-td:border-neutral-800
           '>
-          <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={{
+          <Markdown remarkPlugins={[remarkGfm,remarkLinks]} rehypePlugins={[rehypeRaw]} components={{
             img:({node,...props})=>(
               <img
                 {...props} style={{display:'inline-block',marginRight:'4px',marginTop:'0px',marginBottom:'0px'}} alt={props.alt||'img'}
               />
             ),
-            a: ({ node, ...props})=>(
+            a: ({ node, ...props})=>{
+              const notetitle=props['data-note-title' as keyof typeof props]as string;
+              if(props.href?.startsWith('link:')|| notetitle){
+                return(
+                  <a {...props} className='text-sky-400 hover:underline bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-800/60 font-medium cursor-pointer' onClick={(e)=>handleLinkClick(e,notetitle)}>{props.children}</a>
+                )
+              }
+              return (
               <a {...props} target="_blank" rel="noopener noreferrer" className='text-sky-400 hover:underline'/>
-            )
+              )
+            }
           }}>
             {content||"*nothing to preview yet ;-;*"}
           </Markdown>

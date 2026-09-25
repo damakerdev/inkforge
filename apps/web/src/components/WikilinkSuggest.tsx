@@ -31,7 +31,7 @@ return (
         {filteredNotes.map((note) => (
             <button 
                 key={note.id}
-                onClick={() => onSelect(note.title)}
+                onMouseDown={(e) => { e.preventDefault(); onSelect(note.title)}}
                 className="w-full text-left px-3 py-2 hover:bg-neutral-800 text-neutral-200 border-b border-neutral-800/50 last:border-none transition cursor-pointer flex justify-between items-center"
                 type="button"
                 >

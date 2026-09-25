@@ -11,8 +11,8 @@ interface EditorProps {
 export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
   return (
     <div className='grid grid-cols-2 h-full w-full overflow-hidden'>
-      <div className='bg-neutral-900/30 flex flex-col overflow-hidden h-full pr-1'>
-        <span className='bg-neutral-800/50 text-[12px] font-inter justify-center rounded border border-neutral-700 mx-3 font-semibold uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>raw text</span>
+      <div className='bg-neutral-950/30 flex flex-col overflow-hidden h-full pr-1 pt-1'>
+        <span className='bg-neutral-950/30 text-[12px] font-inter justify-center rounded border border-neutral-700 mx-3 font-semibold uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>raw text</span>
       <textarea value={content} 
         onChange={(e)=>onChange(e.target.value)}
         placeholder='type raw markdown text here. (e.g. # header, **bold**,etc)'
@@ -21,8 +21,8 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
       </div>
 
 
-      <div className='bg-neutral-900/30 flex flex-col overflow-hidden h-full border-l border-neutral-800'>
-        <span className='bg-neutral-800/50 text-[12px] font-semibold font-inter justify-center rounded border border-neutral-700 mx-3 uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>markdown preview</span>
+      <div className='bg-neutral-950/30 flex flex-col overflow-hidden h-full border-l border-neutral-800 pt-1'>
+        <span className='bg-neutral-950/30 text-[12px] font-semibold font-inter justify-center rounded border border-neutral-700 mx-3 uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>markdown preview</span>
 
         <div className='flex-1 p-4 overflow-y-auto prose prose-invert max-w-none font-inter overflow-hidden pr-1'>
           {/* old code very simple */}

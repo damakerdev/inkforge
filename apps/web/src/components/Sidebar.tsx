@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNoteStore, type Note} from '../stores/useNoteStore';
-import { Trash2, Edit2 } from 'lucide-react';
+import { Trash2, Edit2, Plus } from 'lucide-react';
 
 
 // Local type definition  to resolve the build error
@@ -66,12 +66,12 @@ export const Sidebar: React.FC = () => {
                 <div className='flex flex-1 items-center gap-2'>
                     <input
                             type="text"
-                            placeholder="search notes..."
+                            placeholder="Search Notes..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-700"
+                            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-700"
                     />
-                    <button onClick={ () => addNote({ title: 'Untitled Note', content: ''})} className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-md text-xs font-semibold transition cursor-pointer">+New</button>
+                    <button onClick={ () => addNote({ title: 'Untitled Note', content: ''})} className="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-md text-xs font-semibold transition cursor-pointer">+New</button>
                 </div>
                     </div>
                     {/* Itemized Notes Navigation Tree */}

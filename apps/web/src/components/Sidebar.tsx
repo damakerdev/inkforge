@@ -38,27 +38,18 @@ export const Sidebar: React.FC = () => {
 
     return (
         <aside className="w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col h-full text-neutral-200">
-            {/* Sidebar Header & Add Note Trigger */}
-            <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
-                <h1 className="font-bold text-lg text-neutral-100 tracking-tight">InkForge</h1>
-                <button 
-                    onClick={ () => addNote({ title: 'Untitled Note', content: ''})}
-                    className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-md text-xs font-semibold transition cursor-pointer">
-                        +New
-                    </button>
-            </div>
-
-            {/*Real-time Search Input */}
-            <div className="p-3 border-b border-neutral-800">
-                <input
-                    type="text"
-                    placeholder="search notes..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-700"
+            <div className="py-3 px-2 border-b border-neutral-800">
+                <div className='flex flex-1 items-center gap-2'>
+                    <input
+                            type="text"
+                            placeholder="search notes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-700"
                     />
+                    <button onClick={ () => addNote({ title: 'Untitled Note', content: ''})} className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-md text-xs font-semibold transition cursor-pointer">+New</button>
+                </div>
                     </div>
-
                     {/* Itemized Notes Navigation Tree */}
                     <div className="flex-1 overflow-y-auto">
                         {filteredNotes.length === 0 ? (

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNoteStore, type Note} from '../stores/useNoteStore';
+import { Trash2, Edit2 } from 'lucide-react';
 
 
 // Local type definition  to resolve the build error
@@ -12,19 +13,21 @@ import { useNoteStore, type Note} from '../stores/useNoteStore';
 // }
 
 export const Sidebar: React.FC = () => {
-    const {notes, activeNote, setActiveNote, createNote:addNote, deleteNote } = useNoteStore();
+    const {notes, activeNote, setActiveNote, createNote:addNote, deleteNote, updateNoteTitle} = useNoteStore();
     const [searchTerm, setSearchTerm] = useState('');
+    const [editingNoteId, setEditingNoteId]=useState<string | null>(null);
+    const [editTitle,setEditTitle]=useState('');
 
-    //Safeguard against undefined notes array during initial API fetch
     const safeNotes: Note[] = Array.isArray(notes) ? notes: [];
 
-    // Filter notes in real-time by title or body matching search input
     const filteredNotes = safeNotes.filter(
         (note) =>
             note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             note.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
     const handleSelectNote = (note: Note) => {
+        if(editingNoteId) return;
+
         if (activeNote?.id !== note.id) {
             setActiveNote(note);
         }
@@ -35,6 +38,27 @@ export const Sidebar: React.FC = () => {
         e.preventDefault();
         await deleteNote(id);
         };
+
+    const handleRenameStart=(e:React.MouseEvent,note:Note)=>{
+        e.stopPropagation();
+        setActiveNote(note);
+        setEditingNoteId(note.id);
+        setEditTitle(note.title)
+    }
+    const handleRenameSave = ()=>{
+        if(editingNoteId && editTitle.trim()){
+            updateNoteTitle(editTitle.trim())
+        }
+        setEditingNoteId(null);
+    }
+
+    const handleKeyDown=(e:React.KeyboardEvent)=>{
+        if(e.key==='Enter'){
+            handleRenameSave();
+        } else if(e.key==='Escape'){
+            setEditingNoteId(null);
+        }
+    }
 
     return (
         <aside className="w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col h-full text-neutral-200">
@@ -58,32 +82,53 @@ export const Sidebar: React.FC = () => {
                             </p>
                         ) : (
                          filteredNotes.map((note) => {
-                         const isactive = activeNote?.id === note.id;
-                         return (
-                         <div 
-                         key={note.id}
-                         onClick = {() => handleSelectNote(note)}
-                         className={`p-3 border-b border-neutral-800/50 cursor-pointer flex justify-between items-center group transition  ${
-                            isactive
-                            ? 'bg-neutral-800 text-neutral-100 font-medium'
-                            : 'hover:bg-neutral-800/40 text-neutral-400 hover:text-neutral-200'
-                            }`}
-                            >
-                    <div className="truncate flex-1 pr-2">
-                            <p className="text-sm truncate"> {note.title || 'Untitled Note' }</p>
-                    </div>
-                    <button 
-                            onClick={(e) => handleDeleteNote(e, note.id)}
-                            className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-400 text-xs font-bold transition px-1 cursor-pointer"
-                            title="Delete note"
-                            >
-                                X
-                            </button>
-                        </div>
-                        );
-})
-)}
-</div>
-</aside>
-);
-};
+                            const isactive = activeNote?.id === note.id;
+                            const isEditing= editingNoteId===note.id;
+                            return (
+                                <div 
+                                key={note.id}
+                                onClick = {() => handleSelectNote(note)}
+                                className={`p-3 border-b border-neutral-800/50 cursor-pointer flex justify-between items-center group transition  ${
+                                    isactive
+                                    ? 'bg-neutral-800 text-neutral-100 font-medium'
+                                    : 'hover:bg-neutral-800/40 text-neutral-400 hover:text-neutral-200'
+                                    }`}
+                                    >{isEditing?(
+                                            <input
+                                                type="text"
+                                                value={editTitle}
+                                                onChange={(e)=>setEditTitle(e.target.value)}
+                                                onBlur={handleRenameSave}
+                                                onKeyDown={handleKeyDown}
+                                                onFocus={(e)=>e.target.select()}
+                                                autoFocus
+                                                onClick={(e)=>e.stopPropagation()}
+                                                className='w-full bg-transparent text-neutral-100 text-sm focus:outline-none border-b-1 border-sky-500 pb-0.5'
+                                            />
+                                        ):(
+                                            <>
+                                                <div className="truncate flex-1 pr-2">
+                                                        <p className="text-sm truncate"> {note.title || 'Untitled Note' }</p>
+                                                </div>
+                                                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-3 transition">
+                                                    <button 
+                                                        onClick={(e) => handleRenameStart(e, note)}
+                                                        title="Edit note"
+                                                        className='cursor-pointer text-neutral-500 hover:text-neutral-100 transition'
+                                                    ><Edit2 className="w-3.5 h-3.5"/></button>
+                                                    <button 
+                                                        onClick={(e) => handleDeleteNote(e, note.id)}
+                                                        title="Delete note"
+                                                        className='cursor-pointer text-neutral-500 hover:text-red-400/80 transition'
+                                                    ><Trash2 className='w-3.5 h-3.5'/></button>
+                                                </div>
+                                            </>
+                                        )}
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </aside>
+        );
+    };

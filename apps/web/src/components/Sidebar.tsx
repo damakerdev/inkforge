@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNoteStore, type Note} from '../stores/useNoteStore';
-import { Trash2, Edit2, Plus } from 'lucide-react';
+import { Trash2, Edit2 } from 'lucide-react';
 
 
 // Local type definition  to resolve the build error

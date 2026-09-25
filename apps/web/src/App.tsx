@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PenTool, Network, Download } from 'lucide-react';
+import { PenTool, Network, Download, Loader2, WifiOff } from 'lucide-react';
 import { useNoteStore } from './stores/useNoteStore';
 import {Sidebar } from './components/Sidebar';
 // import {TiptapEditor} from './components/TiptapEditor';
@@ -16,6 +16,7 @@ export default function App(){
 
   useEffect(()=>{
     const API_BASE=import.meta.env.VITE_API_URL||"http://127.0.0.1:8000";
+    setBackendStatus("connecting");
     fetch(`${API_BASE}`)
       .then((res)=>res.json())
       .then((data)=>{
@@ -67,12 +68,24 @@ export default function App(){
         <Sidebar />
         <div className='flex-1 h-full overflow-hidden flex flex-col'>
           {/* <TiptapEditor />  */}
-          {activeNote ? (
+          {backendStatus==='connecting'?(
+            <div className='flex-1 flex items-center justify-center text-neutral-500'>
+              <Loader2 className='w-5 h-5 animate-spin text-sky-400'/>
+              <span>Connecting to API server...</span>  
+              <span>Render server is starting up, it may take about 30 seconds</span>
+            </div>
+          ): backendStatus==='offline'?(
+            <div className='flex-1 flex gap-2 flex-col items-center justify-center text-neutral-500'>
+              <WifiOff className='w-10 h-10 text-red-400/80'/>
+              <span className='text-[20px] text-neutral-400 font-medium'>Server is offline</span>
+              <span className='text-[12px] text-neutral-600 max-w-sm text-center'>Could not connect to the API server. Refresh to try again ;-;</span>
+            </div>       
+          ): activeNote? (
             <MdEditor 
             content={activeNote.content}
              onChange={(newcontnt)=>updateNoteContent(newcontnt)}
           />):(
-            <div>no note selected. select or create a note from the sidebar.</div>
+            <div className='flex-1 flex items-center justify-center text-neutral-500'>no note selected. select or create a note from the sidebar.</div>
           )}
           <Backlinks/>
         </div>

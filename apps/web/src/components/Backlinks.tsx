@@ -1,6 +1,5 @@
 import React from 'react';
 import {useNoteStore } from '../stores/useNoteStore';
-import { extractWikiLinks } from '../utils/markdownParser';
 
 export const Backlinks: React.FC = () => {
     const {notes, activeNote, setActiveNote } = useNoteStore();
@@ -10,8 +9,17 @@ export const Backlinks: React.FC = () => {
     //Filter notes that contain a [[WikiLink]] matching activeNote.title
     const referencingNotes = notes.filter((note) => {
         if (note.id === activeNote.id) return false;
-        const links = extractWikiLinks(note.content);
-        return links.some((link) => link.toLowerCase() === activeNote.title.toLowerCase());
+
+        const linkRegex=/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
+        let match:RegExpExecArray|null;
+
+        while((match=linkRegex.exec(note.content))!==null){
+            const title=match[1].trim();
+            if(title.toLowerCase()===activeNote.title.toLowerCase()){
+                return true;
+            }
+        }
+        return false;
     
     });
 

@@ -89,7 +89,7 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
               const notetitle=props['data-note-title' as keyof typeof props]as string;
               if(props.href?.startsWith('link:')|| notetitle){
                 return(
-                  <a {...props} className='text-sky-400 hover:underline bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-800/60 font-medium cursor-pointer' onClick={(e)=>handleLinkClick(e,notetitle)}>{props.children}</a>
+                  <a {...props} className='text-sky-400 hover:underline bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-800/60 font-medium cursor-pointer' onClick={(e)=>handleLinkClick(e,notetitle)} title={`open note: ${notetitle}`}>{props.children}</a>
                 )
               }
               return (

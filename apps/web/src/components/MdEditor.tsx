@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { remarkLinks } from './remarkLinks';
 import { useNoteStore } from '../stores/useNoteStore';
+import { LinkAutocomplete } from './LinkAutocomplete';
 
 interface EditorProps {
   content: string;
@@ -13,6 +14,7 @@ interface EditorProps {
 export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
 
   const {notes, setActiveNote}=useNoteStore();
+  const textareaRef=useRef<HTMLTextAreaElement>(null);
   const handleLinkClick=(e: React.MouseEvent,title:string)=>{
     e.preventDefault();
     const targetnote=notes.find(
@@ -29,11 +31,12 @@ export const MdEditor:React.FC<EditorProps>=({content, onChange})=>{
     <div className='grid grid-cols-2 h-full w-full overflow-hidden'>
       <div className='bg-neutral-950/30 flex flex-col overflow-hidden h-full pr-1 pt-1'>
         <span className='bg-neutral-950/30 text-[12px] font-inter justify-center rounded border border-neutral-700 mx-3 font-semibold uppercase my-3 px-1.5 py-1.5 flex text-neutral-400'>raw text</span>
-      <textarea value={content} 
+      <textarea ref={textareaRef} value={content} 
         onChange={(e)=>onChange(e.target.value)}
         placeholder='type raw markdown text here. (e.g. # header, **bold**,etc)'
         className='flex-1 bg-transparent p-4 pt-4 text-neutral-200 w-full focus:outline-none text-base h-full overflow-y-auto leading-relaxed font-inter resize-none'
       />
+      <LinkAutocomplete textareaRef={textareaRef} value={content} onChange={onChange}/>
       </div>
 
 

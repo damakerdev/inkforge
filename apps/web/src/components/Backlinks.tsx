@@ -6,7 +6,6 @@ export const Backlinks: React.FC = () => {
 
     if(!activeNote) return null;
 
-    //Filter notes that contain a [[WikiLink]] matching activeNote.title
     const referencingNotes = notes.filter((note) => {
         if (note.id === activeNote.id) return false;
 
@@ -29,7 +28,7 @@ export const Backlinks: React.FC = () => {
                 Linked References ({referencingNotes.length})
             </h3>
             {referencingNotes.length === 0 ? (
-                <p className="text-xs text-neutral-500 italic">No notes link to this page yet.</p>
+                <p className="text-xs text-neutral-500 italic">No notes link to this page yet. Type '[[' to link a note.</p>
             ) : (
                 <div className="flex flex-wrap gap-2">
                     {referencingNotes.map((note) => (

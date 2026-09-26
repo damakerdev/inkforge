@@ -1,3 +1,5 @@
+// not using this system now, made remarkLinks which is our own remark extension for links
+
 import React from 'react';
 import { useNoteStore } from '../stores/useNoteStore';
 

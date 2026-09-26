@@ -38,7 +38,7 @@ export const Backlinks: React.FC = () => {
                         className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700/60 rounded text-xs text-sky-400 transition cursor-pointer"       
                          type="button"
                          >
-                            [[{note.title}]]
+                            {note.title}
                          </button>
                     ))}
         </div>

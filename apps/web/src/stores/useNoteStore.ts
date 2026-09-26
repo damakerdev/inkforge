@@ -1,4 +1,5 @@
 import {create } from 'zustand';
+import { updateLinks } from '../utils/LinkUpdater';
 
 export interface Note{
     id: string;
@@ -15,6 +16,7 @@ interface NoteState {
     setActiveNoteId: (id:string)=>void;
     setActiveNote: (note: Note | null) => void;
     createNote: (noteData? : {title?: string; content?: string}) => Promise<void>;
+    renameNote: (noteId: string, newTitle: string)=>void;
     saveActiveNote: (title: string, content: string) => Promise<void>;
     updateNoteContent: (content: string) =>Promise<void>;
     updateNoteTitle:(title:string)=>Promise<void>;
@@ -100,6 +102,44 @@ export const useNoteStore=create<NoteState>((set,get)=> ({
             }
         } catch(error){
             console.error("failed to create note: ", error);
+        }
+    },
+
+    renameNote: async (noteId, newTitle)=>{
+        const {notes} = get();
+        const currNote= notes.find((n)=>n.id===noteId);
+        if(!currNote) return;
+        const oldTitle = currNote.title;
+        const newTitleTrim= newTitle.trim();
+        if(oldTitle.toLowerCase()===newTitleTrim.toLowerCase()) return;
+
+        const updatedNotes= notes.map((note)=>note.id===noteId? {
+            ...note,title:newTitleTrim, updatedAt: new Date().toISOString()
+        }: note);
+        const finalNotes= updateLinks(updatedNotes,oldTitle,newTitleTrim)
+
+        set({notes:finalNotes, activeNote:finalNotes.find((n)=>n.id===get().activeNoteId)|| null})
+
+        try{
+            await fetch(`${API}/${noteId}`,{
+                method:"PUT",
+                headers:{"Content-Type": "application/json"},
+                body: JSON.stringify({title: newTitleTrim}),
+            })
+            for(const n of finalNotes){
+                if(n.id!==noteId){
+                    const orig=notes.find((nn)=>nn.id===n.id)
+                    if(orig && orig.content !==n.content){
+                        await fetch(`${API}/${n.id}`,{
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json"},
+                            body: JSON.stringify({content: n.content})
+                        })
+                    }
+                }
+            }
+        } catch(err){
+            console.error("failed to sync rename and new links to server: ",err);
         }
     },
 

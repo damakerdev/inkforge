@@ -31,7 +31,7 @@ export default function App(){
 
   return (
     <div className='h-screen w-screen bg-neutral-900 text-neutral-300 flex flex-col justify-between font-inter selection:bg-sky-900 selection:text-white overflow-hidden'>
-    <header className='w-full flex justify-between items-center px-2 py-3 border-b border-neutral-800 text-neutral-400'>
+    <header className='w-full flex justify-between items-center pl-2 pr-3 py-3 border-b border-neutral-800 text-neutral-400'>
         <div className='flex items-center space-x-2'>
           <div className='flex items-center space-x-1.5 px-2 py-1 rounded hover:bg-neutral-800/50 cursor-pointer transition-colors text-neutral-200'>
             <PenTool className='w-6 h-6 text-neutral-100 stroke-[2.25]'/>
@@ -86,7 +86,7 @@ export default function App(){
         </div>
       </main>
 
-      <footer className='w-full bg-neutral-950/30 flex border-t border-neutral-800 px-6 py-2 justify-between items-center'>
+      <footer className='w-full bg-neutral-950/30 flex border-t border-neutral-800 pl-2 pr-3 py-2 justify-between items-center'>
         <span className='font-mono font-medium text-xs text-neutral-600'>InkForge v0.1</span>
         <div className='flex items-center space-x-2 text-xs'>
           <span className=' text-neutral-500 font-mono font-medium'>API STATUS:</span>

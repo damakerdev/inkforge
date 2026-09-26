@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNoteStore} from '../stores/useNoteStore';
 import { extractWikiLinks } from '../utils/markdownParser';
 import {Network, X} from 'lucide-react';
@@ -10,6 +10,19 @@ interface GraphViewProps {
 
 export const GraphView: React.FC<GraphViewProps> = ({ isOpen, onClose }) => {
     const { notes, setActiveNote } = useNoteStore();
+
+    useEffect(()=>{
+        if(!isOpen) return;
+        const handleKeyDown=(e: KeyboardEvent)=>{
+            if(e.key==='Escape'){
+                (document.activeElement as HTMLElement)?.blur();
+                onClose()
+            }
+        }
+        window.addEventListener('keydown',handleKeyDown)
+        return()=> window.removeEventListener('keydown',handleKeyDown)
+    }, [isOpen,onClose]);
+    
     const {nodes, links } = useMemo(() => {
         if (!notes.length) return { nodes: [], links: []};
 
@@ -70,18 +83,14 @@ return (
                     onClick={onClose}
                     className="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-neutral-200 transition"
                     type="button"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                ><X className="w-5 h-5" />
+                </button>
         </div>
         {/* Graph Canvas Visual */}
         <div className="p-6 flex items-center justify-center bg-neutral-900">
             {nodes.length === 0 ? (
-                <div className="text-neutral-500 font-mono text-sm py-12">
-                    No notes available to map.
-                </div>
-            ) : ( 
-                <svg width="600" height="400" className="overflow-visible">
+                <div className="text-neutral-500 font-mono text-sm py-12">No notes available to map.</div>
+            ) : ( <svg width="600" height="400" className="overflow-visible">
                     {/* Edges */}
                     {links.map((link) => (
                         <line
@@ -111,18 +120,14 @@ return (
                                 cx={node.x}
                                 cy={node.y}
                                 r="10"
-                                className="fill-sky-500 stroke-neutral-900 group-hover:fill-sky-400 transition-colors"
+                                className="fill-sky-600 stroke-neutral-900 group-hover:fill-sky-400 transition-colors"
                                 strokeWidth="2"
                                 />
-
                                 <text 
                                     x={node.x}
                                     y={node.y+25}
                                     textAnchor="middle"
-                                    className="fill-neutral-300 group-hover:fill-white text-[13px] font-mono transition-colors pointer-events-none"
-                                    >
-                                        {node.title}
-                                    </text>
+                                    className="fill-neutral-300 group-hover:fill-white text-[13px] font-mono transition-colors pointer-events-none">{node.title}</text>
                         </g>
                     ))}
                     </svg>

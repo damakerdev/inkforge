@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNoteStore } from '../stores/useNoteStore';
 import {Download, FileText, Code, X} from 'lucide-react';
 
@@ -10,9 +10,20 @@ interface ExportModalProps {
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose}) => {
     const { notes, activeNote } = useNoteStore();
 
+    useEffect(()=>{
+        if(!isOpen) return;
+        const handleKeyDown=(e:KeyboardEvent)=>{
+            if(e.key==='Escape'){
+                onClose();
+                (document.activeElement as HTMLElement)?.blur();
+            }
+        }
+        window.addEventListener('keydown',handleKeyDown)
+        return()=> window.removeEventListener('keydown',handleKeyDown)
+    },[isOpen,onClose])
+
     if(!isOpen) return null;
 
-    // Helper to trigger browser file download
     const downloadFile = (content: string, filename: string, type:string) => {
         const blob = new Blob([content], { type });
         const url = URL.createObjectURL(blob);
@@ -43,7 +54,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose}) => {
                 <div className="px-6 py-4 border-b border-neutral-800 flex justify-between items-center bg-neutral-950">
                    <div className="flex items-center space-x-2 text-neutral-200">
                         <Download className="w-5 h-5 text-emerald-400" />
-                        <h2 className="font-merri font-bold text-lg"> Export Notes</h2>
+                        <h2 className="font-merri font-bold text-lg">Export Notes</h2>
                         </div>
                  <button 
                     onClick={onClose}

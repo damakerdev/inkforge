@@ -231,13 +231,24 @@ try {
             const res=await fetch(`${API}/${id}`,{method:"DELETE"});
             if(res.ok){
                 set((state)=>{
+                    const { notes, activeNote} = state;
+                    const indexToDel=notes.findIndex((n)=>n.id===id);
+                    if(indexToDel===-1) return state;
                     const remainingNotes=state.notes.filter((n)=>n.id!==id);
-                    const nextActive = remainingNotes.length >0 ? remainingNotes[0] : null;
+                    let nextActive = activeNote;
+                    if(activeNote?.id===id){
+                        if(remainingNotes.length===0){
+                            nextActive=null;
+                        } else if ( indexToDel< remainingNotes.length){
+                            nextActive=remainingNotes[indexToDel]
+                        } else {
+                            nextActive = remainingNotes[remainingNotes.length-1];
+                        }
+                    }
                     return {
                         notes:remainingNotes,
-                        activeNoteId: nextActive ? nextActive.id : null,
                         activeNote: nextActive,
-                                   };               
+                    };               
                 });
             }
         } catch(error){

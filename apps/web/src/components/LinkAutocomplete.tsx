@@ -46,7 +46,6 @@ export const LinkAutocomplete: React.FC<LinkAutocompleteProps>= ({
         const textarea=textareaRef.current;
         if(!textarea||!isOpen) return;
         const handleKeyDown=(e: KeyboardEvent) =>{
-            if(filteredNotes.length ===0) return;
             if(e.key==='ArrowDown'){
                 e.preventDefault()
                 setSelectedIndex((prev)=>(prev+1)%filteredNotes.length)
@@ -82,9 +81,14 @@ export const LinkAutocomplete: React.FC<LinkAutocompleteProps>= ({
 
     if(!isOpen) return null;
     return (
-        <div className='z-50 max-w-64 max-h-48 overflow-y-auto bg-neutral-900 border-1 border-neutral-800 rounded-md p-1 font-mono text-xs'>
+        <div className='absolute top-10 left-1/2 -translate-x-1/2 z-50 w-120 max-h-64 overflow-y-auto bg-neutral-900 border-1 border-neutral-800 rounded-md p-1 font-inter text-[15px]'>
+            <div className='px-1.5 py-1 text-[13px] text-neutral-500 border-b border-neutral-800 mb-1 flex justify-between  items-center'>
+                <span>Link Note</span>
+                <span className='font-inter text-neutral-400 text-xs'>esc to close</span>
+            </div>
+
             {filteredNotes.length===0?(
-                <div className='p-2 text-neutral-500 italic'>
+                <div className='p-2 text-neutral-500'>
                     no matching notes. Press <span className='text-neutral-300'>Enter</span> to use "{query}".
                 </div>
             ):(

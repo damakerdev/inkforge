@@ -1,7 +1,7 @@
-import React, { useMemo, useEffect } from 'react';
-import { useNoteStore} from '../stores/useNoteStore';
-import { extractWikiLinks } from '../utils/markdownParser';
-import {Network, X} from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { useNoteStore } from '../stores/useNoteStore';
+import {Network, X, ZoomIn, ZoomOut, Maximize2, Filter } from 'lucide-react';
+import { ForceGraph, type ForceGraphHandle } from './ForceGraph';
 
 interface GraphViewProps {
     isOpen: boolean;
@@ -9,131 +9,123 @@ interface GraphViewProps {
 }
 
 export const GraphView: React.FC<GraphViewProps> = ({ isOpen, onClose }) => {
-    const { notes, setActiveNote } = useNoteStore();
+    const { notes, setActiveNote, activeNote } = useNoteStore();
+    const graphRef = useRef<ForceGraphHandle>(null);
+    const [localOnly, setLocalOnly] = useState(false);
+    const [showLabels, setShowLabels] = useState(true);
 
-    useEffect(()=>{
+
+    React.useEffect(()=>{
         if(!isOpen) return;
-        const handleKeyDown=(e: KeyboardEvent)=>{
-            if(e.key==='Escape'){
-                (document.activeElement as HTMLElement)?.blur();
-                onClose()
-            }
-        }
-        window.addEventListener('keydown',handleKeyDown)
-        return()=> window.removeEventListener('keydown',handleKeyDown)
+        const handler =(e: KeyboardEvent)=>{
+            if(e.key==='Escape') onClose();
+        }; 
+
+        window.addEventListener('keydown',handler);
+        return()=> window.removeEventListener('keydown',handler)
     }, [isOpen,onClose]);
+
+    if (!isOpen) return null;
     
-    const {nodes, links } = useMemo(() => {
-        if (!notes.length) return { nodes: [], links: []};
+    const connectedCount = activeNote
+    ? notes.filter((n) => {
+        if (n.id === activeNote.id) return false;
+        return (   
+            n.content.includes(`[[${activeNote.title}]]`) ||
+            activeNote.content.includes (`[[${n.title}]]`)
+        );
+    }).length
+    : 0;
 
-        const radius = 180;
-        const width = 600;
-        const height = 400;
-        const centerX = width/2;
-        const centerY = height/2;
-
-        const nodeList = notes.map((note,idx) => {
-            const angle = (idx / notes.length) * 2 * Math.PI;
-            return {
-                id:note.id,
-                title: note.title || 'Untitled',
-                x: centerX + radius * Math.cos(angle),
-                y: centerY + radius * Math.sin(angle),
-                note,
-            };
-    });
-
-    const edgeList: { x1: number; y1: number; x2: number;y2:number; id:string } [] = [];
-
-    nodeList.forEach((sourceNode) => {
-        const extractedTitles = extractWikiLinks(sourceNode.note.content);
-        extractedTitles.forEach((linkTitle) => {
-            const targetNode = nodeList.find(
-                (n) => n.title.toLowerCase() === linkTitle.toLowerCase()
+    const displayedNotes = 
+        localOnly && activeNote 
+        ? notes.filter((n) => {
+            if (n.id === activeNote.id) return true;
+            return (
+                n.content.includes(`[[${activeNote.title}]]`) ||
+                (activeNote.content.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g)
+                || []).some(
+                    (m) => m.slice(2, -2).toLowerCase() ===
+                    n.title.toLowerCase()
+                )
             );
+        })
+        : notes;
 
-            if (targetNode) {
-                edgeList.push ({
-                    id: `${sourceNode.id}-${targetNode.id}`,
-                    x1: sourceNode.x,
-                    y1: sourceNode.y,
-                    x2: targetNode.x,
-                    y2: targetNode.y,
-
-                });
-            }
-        });
-    });
-
-    return { nodes: nodeList, links: edgeList };
-}, [notes]);
-
-if (!isOpen) return null;
 
 return (
-    <div className="fixed inset-0 z-50 bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-neutral-950 border border-neutral-800 rounded-lg w-full max-w-3xl flex flex-col shadow-2xl overflow-hidden">
-            {/* Model Header */}
-            <div className="px-6 py-4 border-b border-neutral-800 flex justify-between items-center bg-neutral-900/50">
-            <div className = "flex items-center space-x-3 text-neutral-200">
-                <Network className = "w-5 h-5 text-sky-400"/>
-                <h2 className="font-merri font-bold text-xl">Knowledge Graph</h2>
-                </div>
-                <button
-                    onClick={onClose}
-                    className="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-neutral-200 transition"
-                    type="button"
-                ><X className="w-5 h-5" />
-                </button>
-        </div>
-        {/* Graph Canvas Visual */}
-        <div className="p-6 flex items-center justify-center bg-neutral-900">
-            {nodes.length === 0 ? (
-                <div className="text-neutral-500 font-mono text-sm py-12">No notes available to map.</div>
-            ) : ( <svg width="600" height="400" className="overflow-visible">
-                    {/* Edges */}
-                    {links.map((link) => (
-                        <line
-                            key={link.id}
-                            x1={link.x1}
-                            y1={link.y1}
-                            x2={link.x2}
-                            y2={link.y2}
-                            stroke="#0284c7"
-                            strokeWidth="2"
-                            strokeOpacity="0.5"
-                            strokeDasharray="4 4"
-                        />
-                    ))}
+    <div className="fixed inset-0 z-50 bg-neutral-950/85 backdrop-blur-sm flex items-center justify-center p-3">
+        <div className="bg-neutral-950 border border-neutral-800 rounded-xl w-full h-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-5 py-3 border-b border-neutral-800 flex justify-between items-center bg-neutral-900/60 shrink-0">
+            <div className = "flex items-center gap-3 text-neutral-200">
+                <Network className="w-4 h-4 text-sky-400" />
+                <h2 className="font-merri font-bold text-lg">Knowledge Graph</h2>
+                <span className="text-xs text-neutral-500 font-mono">
+                    {displayedNotes.length} notes · {' '}
+                    {/* link count shown from sim */}
+                    </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick= {() => setLocalOnly((v) => !v)}
+                            disabled={!activeNote}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono border transition cursor-pointer ${
+                localOnly
+                  ? 'bg-sky-900/40 border-sky-700 text-sky-300'
+                  : 'bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700'
+                            } disabled:opacity-40`}
+                            >
+                                <Filter className="w-3 h-3" />
+                                Local ({connectedCount + 1 })
+                                </button>
 
-                    {/*nodes */}
-                    {nodes.map((node) => (
-                        <g
-                        key={node.id}
-                        onClick={() => {
-                            setActiveNote(node.note);
-                            onClose();
-                        }}
-                        className="cursor-pointer group"
-                        >
-                            <circle
-                                cx={node.x}
-                                cy={node.y}
-                                r="10"
-                                className="fill-sky-600 stroke-neutral-900 group-hover:fill-sky-400 transition-colors"
-                                strokeWidth="2"
-                                />
-                                <text 
-                                    x={node.x}
-                                    y={node.y+25}
-                                    textAnchor="middle"
-                                    className="fill-neutral-300 group-hover:fill-white text-[13px] font-mono transition-colors pointer-events-none">{node.title}</text>
-                        </g>
-                    ))}
-                    </svg>
-            )}
+                                <button
+                                    onClick={() => graphRef.current?.resetView()}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition cursor-pointer"
+                                    >
+                                        <Maximize2 className="w-3 h-3" />
+                                        Reset View 
+                                        </button>
+                                        <button
+                                            onClick={onClose}
+                                            className="p-1.5 hover:bg-neutral-800 rounded text-neutral-400 hover:text-neutral-200 transition cursor-pointer"
+                                            >
+                                                <X className = "w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            </div>
+        {/* Graph Canvas */}
+        <div className="flex-1 overflow-hidden relative">
+            {notes.length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center text-neutral-500 font-mono text-sm">
+                    No notes yet. Create some notes and link them with [[brackets]]. </div>
+            ) : ( 
+                <ForceGraph 
+                    ref={graphRef}
+                    notes={displayedNotes}
+                    activeNoteId={activeNote?.id ?? null}
+                    onNodeClick={(note) => {
+                        setActiveNote(note);
+                        onClose();
+                    }}
+                    width={window.innerWidth - 80}
+                    height={window.innerHeight * 0.9 - 120}
+                    filterNoteId={null}
+                    />
+                )}
+                </div>
+
+                {/* Footer controls */}
+                <div className="px-5 py-2.5 border-t border-neutral-800 flex items-center justify-between shrink-0 bg-neutral-900/40">
+                <span className = "text-xs font-mono text-neutral-600">
+                    Scroll to zoom · Drag background to pan · Drag nodes to reposition · Click node to open 
+                    </span>
+                    <div className="flex items-center gap-3 text-xs text-neutral-500 font-mono">
+                        <span>{displayedNotes.length} nodes </span>
+                        </div>
+                        </div>
+                        </div>
             </div>
-            </div>
-            </div>
-);
-};
+            );
+        };

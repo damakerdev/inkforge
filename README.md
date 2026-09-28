@@ -25,11 +25,15 @@ basically, Obsidian but *our own*.
 - [x] A 2 column basic frontend markdown previewer where u input raw text on one column and get the markdown preview in the other.
 - [x] create new note, see all notes, delete notes
 - [x] Graph visualization with link files feature
+- [x] Force-directed physics graph engine with zoom,pan feature
+- [x] Command Palette for global searching
+- [x] Hashtag extraction engine and tabbed backlinks panel
 
 TODO: A LOT...
 - [ ] Real time collaboration
 - [ ] UI/UX polish to make inkforge feel more goood
 - [ ] Fix the wikilinks feature, file linking doesn't work properly
+- [ ] AI assistant integration for note summarization 
 
 ## Running InkForge locally:
 
@@ -70,3 +74,7 @@ npm run dev
 
 
 ![inkforge-app-in-action-v0.1](img/inkforge.png)
+
+![Global Knowledge Graph](img/globalknowledgegraph.png)
+
+![Command Palette](img/comamndpaletesidebar.png)
